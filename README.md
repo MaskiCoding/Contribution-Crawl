@@ -3,9 +3,9 @@
 Turn your GitHub contribution graph into an animated dungeon crawler adventure! Your contributions become dungeon walls, and a pixel-art hero battles through ghosts lurking in the empty spaces.
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/MaskiCoding/Contribution-Crawl/output/contribution-crawl-dark.svg">
-  <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/MaskiCoding/Contribution-Crawl/output/contribution-crawl-light.svg">
-  <img alt="Contribution Crawl animation" src="https://raw.githubusercontent.com/MaskiCoding/Contribution-Crawl/output/contribution-crawl-light.svg">
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/MaskiCoding/MaskiCoding/main/contribution-crawl-dark.svg">
+  <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/MaskiCoding/MaskiCoding/main/contribution-crawl-light.svg">
+  <img alt="Contribution Crawl animation" src="https://raw.githubusercontent.com/MaskiCoding/MaskiCoding/main/contribution-crawl-light.svg">
 </picture>
 
 ## Features
@@ -17,33 +17,109 @@ Turn your GitHub contribution graph into an animated dungeon crawler adventure! 
 - Wall-breaking when no path exists
 - Light and dark theme variants that match GitHub's color scheme
 
-## Installation
+## Quick Setup for Your Profile
+
+### 1. Create a workflow in your profile repo
+
+In your `USERNAME/USERNAME` repository, create `.github/workflows/contribution-crawl.yml`:
+
+```yaml
+name: Generate Contribution Crawl
+
+on:
+  schedule:
+    - cron: "0 0 * * *"  # Daily at midnight UTC
+  workflow_dispatch:      # Manual trigger
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    
+    steps:
+      - name: Checkout profile repo
+        uses: actions/checkout@v4
+      
+      - name: Clone Contribution Crawl
+        run: git clone https://github.com/MaskiCoding/Contribution-Crawl.git crawl
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: Install dependencies
+        working-directory: crawl
+        run: npm ci
+      
+      - name: Build
+        working-directory: crawl
+        run: npm run build
+      
+      - name: Generate SVGs
+        working-directory: crawl
+        run: node dist/index.js ${{ github.repository_owner }} ../output
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Move SVGs to repo root
+        run: |
+          mv output/contribution-crawl-light.svg .
+          mv output/contribution-crawl-dark.svg .
+          rm -rf crawl output
+      
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add contribution-crawl-*.svg
+          git diff --staged --quiet || git commit -m "Update Contribution Crawl animation"
+          git push
+```
+
+### 2. Add to your README
+
+```markdown
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="./contribution-crawl-dark.svg">
+  <source media="(prefers-color-scheme: light)" srcset="./contribution-crawl-light.svg">
+  <img alt="Contribution Crawl" src="./contribution-crawl-light.svg">
+</picture>
+```
+
+### 3. Trigger the workflow
+
+Go to **Actions** → **Generate Contribution Crawl** → **Run workflow**
+
+---
+
+## Local Development
 
 ```bash
 git clone https://github.com/MaskiCoding/Contribution-Crawl.git
 cd Contribution-Crawl
 npm install
 npm run build
-```
 
-## Usage
-
-### Command Line
-
-```bash
-# Generate for a GitHub user (requires GITHUB_TOKEN for private contributions)
-npm run generate -- <username> [output-dir]
-
-# Examples
-npm run generate -- octocat dist
-GITHUB_TOKEN=your_token npm run generate -- your-username dist
-
-# Use mock data for testing
+# Generate with mock data
 npm run generate -- TestUser dist --mock
 
-# Use dense mock data (tests wall-breaking)
-npm run generate -- TestUser dist --dense
+# Generate for a real user (needs GITHUB_TOKEN for private contributions)
+GITHUB_TOKEN=your_token npm run generate -- your-username dist
 ```
+
+### CLI Options
+
+| Option | Description |
+|--------|-------------|
+| `--mock` | Use randomly generated mock contribution data |
+| `--dense` | Use dense mock data (tests wall-breaking feature) |
 
 ### Environment Variables
 
@@ -51,62 +127,6 @@ npm run generate -- TestUser dist --dense
 |----------|-------------|
 | `GITHUB_TOKEN` | GitHub personal access token (optional, needed for private contributions) |
 | `GITHUB_USERNAME` | Default username if not provided as argument |
-
-## GitHub Actions
-
-Add this workflow to automatically update your profile README:
-
-```yaml
-# .github/workflows/contribution-crawl.yml
-name: Generate Contribution Crawl
-
-on:
-  schedule:
-    - cron: '0 0 * * *'  # Daily at midnight
-  workflow_dispatch:      # Manual trigger
-  push:
-    branches: [main]
-
-jobs:
-  generate:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-      
-      - name: Install dependencies
-        run: npm ci
-      
-      - name: Build
-        run: npm run build
-      
-      - name: Generate SVG
-        run: npm run generate -- ${{ github.repository_owner }} dist
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      
-      - name: Push to output branch
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./dist
-          publish_branch: output
-          user_name: 'github-actions[bot]'
-          user_email: 'github-actions[bot]@users.noreply.github.com'
-```
-
-Then add to your profile README:
-
-```markdown
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/YOUR_USERNAME/Contribution-Crawl/output/contribution-crawl-dark.svg">
-  <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/YOUR_USERNAME/Contribution-Crawl/output/contribution-crawl-light.svg">
-  <img alt="Contribution Crawl" src="https://raw.githubusercontent.com/YOUR_USERNAME/Contribution-Crawl/output/contribution-crawl-light.svg">
-</picture>
-```
 
 ## How It Works
 
