@@ -3,9 +3,9 @@
 Turn your GitHub contribution graph into an animated dungeon crawler adventure! Your contributions become dungeon walls, and a pixel-art hero battles through ghosts lurking in the empty spaces.
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/MaskiCoding/MaskiCoding/main/contribution-crawl-dark.svg">
-  <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/MaskiCoding/MaskiCoding/main/contribution-crawl-light.svg">
-  <img alt="Contribution Crawl animation" src="https://raw.githubusercontent.com/MaskiCoding/MaskiCoding/main/contribution-crawl-light.svg">
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/MaskiCoding/Contribution-Crawl/main/dist/contribution-crawl-dark.svg">
+  <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/MaskiCoding/Contribution-Crawl/main/dist/contribution-crawl-light.svg">
+  <img alt="Contribution Crawl animation" src="https://raw.githubusercontent.com/MaskiCoding/Contribution-Crawl/main/dist/contribution-crawl-light.svg">
 </picture>
 
 ## Features
