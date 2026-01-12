@@ -158,17 +158,23 @@ export interface GamePath {
 export function generateHeroPath(grid: Cell[][]): GamePath {
   const gridWidth = grid[0].length;
 
-  // Find start position (leftmost empty cell that's not a contribution)
-  let start: Position | null = null;
-  for (let x = 0; x < gridWidth && !start; x++) {
-    for (let y = 0; y < grid.length && !start; y++) {
+  // Collect all empty cells (non-wall, non-contribution)
+  const emptyCells: Position[] = [];
+  for (let x = 0; x < gridWidth; x++) {
+    for (let y = 0; y < grid.length; y++) {
       if (!grid[y][x].isWall && grid[y][x].contributionLevel === 'NONE') {
-        start = { x, y };
+        emptyCells.push({ x, y });
       }
     }
   }
 
-  // Fallback: just find any non-wall cell
+  // Pick a random starting position
+  let start: Position | null = null;
+  if (emptyCells.length > 0) {
+    start = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+  }
+
+  // Fallback: find any non-wall cell
   if (!start) {
     for (let x = 0; x < gridWidth && !start; x++) {
       for (let y = 0; y < grid.length && !start; y++) {
