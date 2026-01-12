@@ -98,7 +98,23 @@ In your profile repository, add this to your `README.md`:
 </picture>
 ```
 
-### 4. Run the Workflow
+### 4. (Optional) Enable Private Contributions
+
+The workflow uses `GITHUB_TOKEN` which is automatically provided by GitHub Actions. This works for **public contributions** out of the box.
+
+If you want to include **private contributions**, you need to create a Personal Access Token:
+
+1. Go to [GitHub Settings → Developer settings → Personal access tokens → Tokens (classic)](https://github.com/settings/tokens)
+2. Click **"Generate new token (classic)"**
+3. Give it a name (e.g., `contribution-crawl`)
+4. Select the **`read:user`** scope only
+5. Click **Generate token** and copy it
+6. Go to your profile repo → **Settings** → **Secrets and variables** → **Actions**
+7. Click **"New repository secret"**
+8. Name: `GH_TOKEN`, Value: paste your token
+9. Update the workflow to use `secrets.GH_TOKEN` instead of `secrets.GITHUB_TOKEN`
+
+### 5. Run the Workflow
 
 1. Go to the **Actions** tab in your repository
 2. Click **Generate Contribution Crawl**
