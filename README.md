@@ -157,6 +157,18 @@ GITHUB_TOKEN=your_token node dist/index.js your-username dist
 | `--mock` | Use randomly generated mock contribution data |
 | `--dense` | Use dense mock data (tests wall-breaking feature) |
 
+## 🗺️ Roadmap
+
+Features planned for future releases:
+
+- [ ] Smoother animations
+- [ ] Different enemy types (beyond ghosts)
+- [ ] Progress bar showing completion
+- [ ] Victory animation when all enemies are defeated
+- [ ] Starting/intro animation
+
+Contributions towards any of these are welcome!
+
 ## 🤝 Contributing
 
 Contributions are welcome! To contribute:
