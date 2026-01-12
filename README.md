@@ -1,6 +1,10 @@
-# Contribution Crawl
+# ⚔️ Contribution Crawl
 
-Turn your GitHub contribution graph into an animated dungeon crawler adventure! Your contributions become dungeon walls, and a pixel-art hero battles through ghosts lurking in the empty spaces.
+[![Forks][forks-shield]][forks-url]
+[![Stargazers][stars-shield]][stars-url]
+[![Contributors][contributors-shield]][contributors-url]
+
+Transform your GitHub contribution graph into an animated dungeon crawler adventure! A pixel-art hero battles through Pac-Man style ghosts lurking in the empty spaces of your contribution history.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/MaskiCoding/Contribution-Crawl/main/dist/contribution-crawl-dark.svg">
@@ -8,28 +12,46 @@ Turn your GitHub contribution graph into an animated dungeon crawler adventure! 
   <img alt="Contribution Crawl animation" src="https://raw.githubusercontent.com/MaskiCoding/Contribution-Crawl/main/dist/contribution-crawl-light.svg">
 </picture>
 
-## Features
+## 🎮 Features
 
-- Contributions form dungeon walls (darker green = stronger walls)
-- Pac-Man style ghosts spawn in empty spaces
-- Animated pixel-art hero traverses the entire year
-- Slash animations when battling ghosts
-- Wall-breaking when no path exists
-- Light and dark theme variants that match GitHub's color scheme
+- **Dungeon Visualization**: Your contributions become dungeon walls (darker green = stronger walls)
+- **Pac-Man Style Ghosts**: Classic colorful ghosts spawn in empty spaces
+- **Animated Hero**: Pixel-art adventurer traverses your entire contribution year
+- **Battle Animations**: Slash effects when the hero encounters ghosts
+- **Wall Breaking**: Hero can break through walls when no path exists
+- **Theme Support**: Light and dark variants that match GitHub's color scheme
 
-## Quick Setup for Your Profile
+## 👻 The Ghosts
 
-### 1. Create a workflow in your profile repo
+Each ghost features the classic Pac-Man colors:
 
-In your `USERNAME/USERNAME` repository, create `.github/workflows/contribution-crawl.yml`:
+| Ghost | Color | Description |
+|:-----:|:-----:|:------------|
+| **Blinky** | 🔴 Red | The aggressive leader |
+| **Pinky** | 🩷 Pink | The ambusher |
+| **Inky** | 🩵 Cyan | The unpredictable one |
+| **Clyde** | 🟠 Orange | The shy wanderer |
+
+## 🔧 Integrate into Your GitHub Profile
+
+To showcase Contribution Crawl on your GitHub profile, follow these steps:
+
+### 1. Create a Special Repository
+
+- Create a new repository named exactly as your GitHub username (e.g., `username/username`)
+- This repository powers your GitHub profile page
+
+### 2. Set Up GitHub Actions
+
+In your repository, create `.github/workflows/contribution-crawl.yml`:
 
 ```yaml
 name: Generate Contribution Crawl
 
 on:
   schedule:
-    - cron: "0 0 * * *"  # Daily at midnight UTC
-  workflow_dispatch:      # Manual trigger
+    - cron: "0 0 * * *"  # Run daily at midnight UTC
+  workflow_dispatch:      # Allow manual trigger
   push:
     branches:
       - main
@@ -41,51 +63,45 @@ jobs:
   generate:
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    
+
     steps:
       - name: Checkout profile repo
         uses: actions/checkout@v4
-      
+
       - name: Clone Contribution Crawl
         run: git clone https://github.com/MaskiCoding/Contribution-Crawl.git crawl
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-      
-      - name: Install dependencies
+
+      - name: Install and build
         working-directory: crawl
-        run: npm ci
-      
-      - name: Build
-        working-directory: crawl
-        run: npm run build
-      
+        run: |
+          npm ci
+          npm run build
+
       - name: Generate SVGs
         working-directory: crawl
-        run: node dist/index.js ${{ github.repository_owner }} ../output
+        run: node dist/index.js ${{ github.repository_owner }} ..
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      
-      - name: Move SVGs to repo root
-        run: |
-          mv output/contribution-crawl-light.svg .
-          mv output/contribution-crawl-dark.svg .
-          rm -rf crawl output
-      
+
       - name: Commit and push
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add contribution-crawl-*.svg
-          git diff --staged --quiet || git commit -m "Update Contribution Crawl animation"
+          git diff --staged --quiet || git commit -m "Update Contribution Crawl"
           git push
 ```
 
-### 2. Add to your README
+### 3. Add to Your README
 
-```markdown
+In your profile repository, add this to your `README.md`:
+
+```html
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="./contribution-crawl-dark.svg">
   <source media="(prefers-color-scheme: light)" srcset="./contribution-crawl-light.svg">
@@ -93,13 +109,30 @@ jobs:
 </picture>
 ```
 
-### 3. Trigger the workflow
+### 4. Run the Workflow
 
-Go to **Actions** → **Generate Contribution Crawl** → **Run workflow**
+1. Go to the **Actions** tab in your repository
+2. Click **Generate Contribution Crawl**
+3. Click **Run workflow** → **Run workflow**
 
----
+The SVG will be generated and committed to your repository. Your profile will now display the animated dungeon crawl!
 
-## Local Development
+## 🎯 How It Works
+
+The application uses your GitHub contribution data to:
+
+1. **Fetch Contributions**: Pulls your contribution data via GitHub's GraphQL API
+2. **Build the Dungeon**: Maps contribution levels to dungeon walls:
+   - `NONE`: Empty floor tiles (where ghosts spawn)
+   - `FIRST_QUARTILE`: Light walls
+   - `SECOND_QUARTILE`: Medium walls
+   - `THIRD_QUARTILE`: Strong walls
+   - `FOURTH_QUARTILE`: Strongest walls
+3. **Spawn Monsters**: Places 25 ghosts spread across the year in empty cells
+4. **Pathfinding**: Hero uses BFS to navigate, with wall-breaking as a last resort
+5. **Render Animation**: Generates SVG with SMIL animations for movement, battles, and effects
+
+## 💻 Local Development
 
 ```bash
 git clone https://github.com/MaskiCoding/Contribution-Crawl.git
@@ -108,10 +141,10 @@ npm install
 npm run build
 
 # Generate with mock data
-npm run generate -- TestUser dist --mock
+node dist/index.js TestUser dist --mock
 
-# Generate for a real user (needs GITHUB_TOKEN for private contributions)
-GITHUB_TOKEN=your_token npm run generate -- your-username dist
+# Generate for a real user
+GITHUB_TOKEN=your_token node dist/index.js your-username dist
 ```
 
 ### CLI Options
@@ -121,32 +154,34 @@ GITHUB_TOKEN=your_token npm run generate -- your-username dist
 | `--mock` | Use randomly generated mock contribution data |
 | `--dense` | Use dense mock data (tests wall-breaking feature) |
 
-### Environment Variables
+## 🤝 Contributing
 
-| Variable | Description |
-|----------|-------------|
-| `GITHUB_TOKEN` | GitHub personal access token (optional, needed for private contributions) |
-| `GITHUB_USERNAME` | Default username if not provided as argument |
+Contributions are welcome! To contribute:
 
-## How It Works
+1. Fork the repository
+2. Create a new branch: `git checkout -b feature-name`
+3. Make your changes and commit them: `git commit -m 'Add feature'`
+4. Push to the branch: `git push origin feature-name`
+5. Submit a pull request
 
-1. **Fetch Contributions**: Pulls your GitHub contribution data via GraphQL API
-2. **Build Dungeon**: Maps contributions to walls (green squares) and empty spaces to floors
-3. **Spawn Monsters**: Places 25 ghosts spread across the year in empty cells
-4. **Pathfinding**: Hero uses BFS to find paths to each ghost, with Dijkstra-like wall-breaking as a last resort
-5. **Render SVG**: Generates animated SVG with CSS/SMIL animations for movement, battles, and effects
+## 🙏 Acknowledgements
 
-## Project Structure
+Inspired by the [snk](https://github.com/Platane/snk) project and [pacman-contribution-graph](https://github.com/abozanona/pacman-contribution-graph). Special thanks to the open-source community!
 
-```
-src/
-├── index.ts         # Entry point and CLI
-├── types.ts         # TypeScript interfaces and theme definitions
-├── github-api.ts    # GitHub GraphQL API integration
-├── game-engine.ts   # Dungeon generation, pathfinding, game logic
-└── svg-renderer.ts  # SVG generation with embedded sprites
-```
-
-## License
+## 📄 License
 
 MIT
+
+---
+
+<p align="center">
+  <i>Watch your hero conquer your contribution history!</i> ⚔️👻
+</p>
+
+<!-- MARKDOWN LINKS & IMAGES -->
+[contributors-shield]: https://img.shields.io/github/contributors/MaskiCoding/Contribution-Crawl.svg?style=for-the-badge
+[contributors-url]: https://github.com/MaskiCoding/Contribution-Crawl/graphs/contributors
+[forks-shield]: https://img.shields.io/github/forks/MaskiCoding/Contribution-Crawl.svg?style=for-the-badge
+[forks-url]: https://github.com/MaskiCoding/Contribution-Crawl/network/members
+[stars-shield]: https://img.shields.io/github/stars/MaskiCoding/Contribution-Crawl.svg?style=for-the-badge
+[stars-url]: https://github.com/MaskiCoding/Contribution-Crawl/stargazers
