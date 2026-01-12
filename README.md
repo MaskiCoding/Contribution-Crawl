@@ -166,7 +166,12 @@ Contributions are welcome! To contribute:
 
 ## 🙏 Acknowledgements
 
-Inspired by the [snk](https://github.com/Platane/snk) project and [pacman-contribution-graph](https://github.com/abozanona/pacman-contribution-graph). Special thanks to the open-source community!
+This project was inspired by these amazing contribution graph animations:
+
+- **[snk](https://github.com/Platane/snk)** by [@Platane](https://github.com/Platane) - The original snake game that eats your contributions. This project's workflow structure and approach were heavily influenced by snk.
+- **[pacman-contribution-graph](https://github.com/abozanona/pacman-contribution-graph)** by [@abozanona](https://github.com/abozanona) - A Pac-Man themed contribution visualization that inspired the ghost designs.
+
+Special thanks to the open-source community for making creative profile customizations possible!
 
 ## 📄 License
 
