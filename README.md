@@ -106,6 +106,20 @@ In your profile repository, add this to your `README.md`:
 
 The SVG will be generated and committed to your repository. Your profile will now display the animated dungeon crawl!
 
+### 📁 Final Repository Structure
+
+After setup, your profile repository should look like this:
+
+```
+username/
+├── .github/
+│   └── workflows/
+│       └── contribution-crawl.yml    # GitHub Action workflow
+├── contribution-crawl-dark.svg       # Generated (dark theme)
+├── contribution-crawl-light.svg      # Generated (light theme)
+└── README.md                         # Your profile README
+```
+
 ## 🎯 How It Works
 
 The application uses your GitHub contribution data to:
