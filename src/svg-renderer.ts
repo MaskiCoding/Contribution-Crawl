@@ -1,7 +1,7 @@
 import { Cell, Position, Battle, ColorTheme, MonsterSpawn, WallBreak } from './types';
 
-const CELL_SIZE = 15;
-const CELL_GAP = 3;
+const CELL_SIZE = 22;
+const CELL_GAP = 4;
 const CELL_TOTAL = CELL_SIZE + CELL_GAP;
 
 // Ghost colors (Pac-Man style)
