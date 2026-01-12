@@ -1,0 +1,21 @@
+{
+  "name": "contribution-crawl",
+  "version": "1.0.0",
+  "description": "Turn your GitHub contribution graph into an animated dungeon crawler adventure",
+  "main": "dist/index.js",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:MaskiCoding/Contribution-Crawl.git"
+  },
+  "scripts": {
+    "build": "tsc",
+    "generate": "node dist/index.js"
+  },
+  "dependencies": {
+    "@octokit/graphql": "^7.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  }
+}
