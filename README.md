@@ -21,17 +21,6 @@ Transform your GitHub contribution graph into an animated dungeon crawler advent
 - **Wall Breaking**: Hero can break through walls when no path exists
 - **Theme Support**: Light and dark variants that match GitHub's color scheme
 
-## 👻 The Ghosts
-
-Each ghost features the classic Pac-Man colors:
-
-| Ghost | Color | Description |
-|:-----:|:-----:|:------------|
-| **Blinky** | 🔴 Red | The aggressive leader |
-| **Pinky** | 🩷 Pink | The ambusher |
-| **Inky** | 🩵 Cyan | The unpredictable one |
-| **Clyde** | 🟠 Orange | The shy wanderer |
-
 ## 🔧 Integrate into Your GitHub Profile
 
 To showcase Contribution Crawl on your GitHub profile, follow these steps:
