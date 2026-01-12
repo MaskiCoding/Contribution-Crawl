@@ -11,13 +11,13 @@ async function main() {
   const token = process.env.GITHUB_TOKEN;
   const useMock = process.argv.includes('--mock');
   const useDense = process.argv.includes('--dense');
-  
+
   console.log(`🎮 Contribution Crawl`);
   console.log(`   Username: ${username}`);
   console.log(`   Output: ${outputDir}/`);
   if (useDense) console.log(`   Mode: DENSE (wall-breaking test)`);
   console.log('');
-  
+
   // Fetch contributions
   let weeks;
   try {
@@ -37,12 +37,12 @@ async function main() {
     console.log('   Falling back to mock data...');
     weeks = generateMockContributions();
   }
-  
+
   // Create dungeon
   console.log('🗺️  Creating dungeon from contributions...');
   const grid = createDungeonGrid(weeks);
   console.log(`   Grid size: ${grid[0].length} x ${grid.length}`);
-  
+
   // Generate hero path
   console.log('🗡️  Generating hero adventure...');
   const { path: heroPath, battles, monsterSpawns, wallBreaks } = generateHeroPath(grid);
@@ -50,25 +50,25 @@ async function main() {
   console.log(`   Battles: ${battles.length} encounters`);
   console.log(`   Monster spawns: ${monsterSpawns.length}`);
   console.log(`   Walls broken: ${wallBreaks.length}`);
-  
+
   // Generate SVGs
   console.log('🎨 Rendering SVG animations...');
-  
+
   const lightSVG = generateSVG(grid, heroPath, battles, username, LIGHT_THEME, monsterSpawns, wallBreaks);
   const darkSVG = generateSVG(grid, heroPath, battles, username, DARK_THEME, monsterSpawns, wallBreaks);
-  
+
   // Ensure output directory exists
   if (!fs.existsSync(outputDir)) {
     fs.mkdirSync(outputDir, { recursive: true });
   }
-  
+
   // Write files
   const lightPath = path.join(outputDir, 'contribution-crawl-light.svg');
   const darkPath = path.join(outputDir, 'contribution-crawl-dark.svg');
-  
+
   fs.writeFileSync(lightPath, lightSVG);
   fs.writeFileSync(darkPath, darkSVG);
-  
+
   console.log('');
   console.log('✅ Generated:');
   console.log(`   ${lightPath}`);
@@ -77,7 +77,7 @@ async function main() {
   console.log('✨ Your Contribution Crawl is ready!');
 }
 
-main().catch(error => {
+main().catch((error) => {
   console.error('Fatal error:', error);
   process.exit(1);
 });
