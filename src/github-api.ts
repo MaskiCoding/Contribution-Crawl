@@ -1,5 +1,6 @@
 import { graphql } from '@octokit/graphql';
 import { ContributionWeek, ContributionDay } from './types';
+import { WEEKS_IN_YEAR, DAYS_IN_WEEK } from './constants';
 
 export async function fetchContributions(username: string, token?: string): Promise<ContributionWeek[]> {
   const graphqlWithAuth = graphql.defaults({
@@ -40,9 +41,9 @@ export function generateMockContributions(): ContributionWeek[] {
     'FOURTH_QUARTILE',
   ];
 
-  for (let week = 0; week < 53; week++) {
+  for (let week = 0; week < WEEKS_IN_YEAR; week++) {
     const days: ContributionDay[] = [];
-    for (let day = 0; day < 7; day++) {
+    for (let day = 0; day < DAYS_IN_WEEK; day++) {
       const rand = Math.random();
       let level: ContributionDay['contributionLevel'] = 'NONE';
       let count = 0;
@@ -79,9 +80,9 @@ export function generateDenseContributions(): ContributionWeek[] {
     'FOURTH_QUARTILE',
   ];
 
-  for (let week = 0; week < 53; week++) {
+  for (let week = 0; week < WEEKS_IN_YEAR; week++) {
     const days: ContributionDay[] = [];
-    for (let day = 0; day < 7; day++) {
+    for (let day = 0; day < DAYS_IN_WEEK; day++) {
       const rand = Math.random();
       let level: ContributionDay['contributionLevel'] = 'NONE';
       let count = 0;

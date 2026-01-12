@@ -1,4 +1,5 @@
 import { ContributionWeek, Cell, Position, Battle, MonsterSpawn, WallBreak } from './types';
+import { MOVE_TIME, BATTLE_TIME, WALL_BREAK_TIME, TOTAL_MONSTERS } from './constants';
 
 export function createDungeonGrid(weeks: ContributionWeek[]): Cell[][] {
   const grid: Cell[][] = [];
@@ -24,12 +25,12 @@ export function createDungeonGrid(weeks: ContributionWeek[]): Cell[][] {
   return grid;
 }
 
-function getRandomMonsterType(): Cell['monsterType'] {
+function getRandomMonsterType(): NonNullable<Cell['monsterType']> {
   const rand = Math.random();
   if (rand < 0.45) return 'slime';
-  else if (rand < 0.75) return 'skeleton';
-  else if (rand < 0.92) return 'demon';
-  else return 'dragon';
+  if (rand < 0.75) return 'skeleton';
+  if (rand < 0.92) return 'demon';
+  return 'dragon';
 }
 
 function getNeighbors(grid: Cell[][], pos: Position, allowWalls: boolean = false): Position[] {
@@ -155,8 +156,7 @@ export interface GamePath {
 }
 
 export function generateHeroPath(grid: Cell[][]): GamePath {
-  const gridWidth = grid[0].length; // 53 columns
-  const totalMonsters = 25;
+  const gridWidth = grid[0].length;
 
   // Find start position (leftmost empty cell that's not a contribution)
   let start: Position | null = null;
@@ -189,9 +189,9 @@ export function generateHeroPath(grid: Cell[][]): GamePath {
   occupiedPositions.add(`${start.x},${start.y}`);
 
   // Place monsters evenly across the grid width
-  for (let i = 0; i < totalMonsters; i++) {
-    const zoneStart = Math.floor((i / totalMonsters) * gridWidth);
-    const zoneEnd = Math.floor(((i + 1) / totalMonsters) * gridWidth);
+  for (let i = 0; i < TOTAL_MONSTERS; i++) {
+    const zoneStart = Math.floor((i / TOTAL_MONSTERS) * gridWidth);
+    const zoneEnd = Math.floor(((i + 1) / TOTAL_MONSTERS) * gridWidth);
 
     // Find empty cells in this zone (must be non-contribution floor cells)
     const candidates = getEmptyCellsInRange(grid, zoneStart, zoneEnd, occupiedPositions);
@@ -199,7 +199,7 @@ export function generateHeroPath(grid: Cell[][]): GamePath {
     if (candidates.length > 0) {
       // Pick a random cell from this zone
       const pos = candidates[Math.floor(Math.random() * candidates.length)];
-      const type = getRandomMonsterType()!;
+      const type = getRandomMonsterType();
       monsterPositions.push({ pos, type });
       occupiedPositions.add(`${pos.x},${pos.y}`);
       grid[pos.y][pos.x].hasMonster = true;
@@ -225,9 +225,9 @@ export function generateHeroPath(grid: Cell[][]): GamePath {
   let currentPos = start;
   let currentTime = 0;
 
-  const moveTime = 0.25;
-  const battleTime = 0.6;
-  const wallBreakTime = 0.4;
+  const moveTime = MOVE_TIME;
+  const battleTime = BATTLE_TIME;
+  const wallBreakTime = WALL_BREAK_TIME;
 
   // All monsters spawn at the beginning (they're already placed)
   for (const monster of monsterPositions) {
