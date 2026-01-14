@@ -1,3 +1,7 @@
+/**
+ * Contribution Crawl - Main Entry Point
+ * Generates animated SVG dungeon crawl from GitHub contribution data
+ */
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { fetchContributions, generateMockContributions, generateDenseContributions } from './github-api';
