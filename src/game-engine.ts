@@ -1,5 +1,13 @@
-import { ContributionWeek, Cell, Position, Battle, MonsterSpawn, WallBreak } from './types';
-import { MOVE_TIME, BATTLE_TIME, WALL_BREAK_TIME, TOTAL_MONSTERS } from './constants';
+import { ContributionWeek, Cell, Position, Battle, MonsterSpawn, WallBreak } from './types.js';
+import { MOVE_TIME, BATTLE_TIME, WALL_BREAK_TIME, TOTAL_MONSTERS } from './constants.js';
+
+// Monster spawn probability thresholds (cumulative)
+const MONSTER_THRESHOLDS = {
+  slime: 0.45, // 45% chance
+  skeleton: 0.75, // 30% chance (0.75 - 0.45)
+  demon: 0.92, // 17% chance (0.92 - 0.75)
+  // dragon: remaining 8% (1.0 - 0.92)
+} as const;
 
 export function createDungeonGrid(weeks: ContributionWeek[]): Cell[][] {
   const grid: Cell[][] = [];
@@ -27,9 +35,9 @@ export function createDungeonGrid(weeks: ContributionWeek[]): Cell[][] {
 
 function getRandomMonsterType(): NonNullable<Cell['monsterType']> {
   const rand = Math.random();
-  if (rand < 0.45) return 'slime';
-  if (rand < 0.75) return 'skeleton';
-  if (rand < 0.92) return 'demon';
+  if (rand < MONSTER_THRESHOLDS.slime) return 'slime';
+  if (rand < MONSTER_THRESHOLDS.skeleton) return 'skeleton';
+  if (rand < MONSTER_THRESHOLDS.demon) return 'demon';
   return 'dragon';
 }
 
@@ -54,26 +62,37 @@ function getNeighbors(grid: Cell[][], pos: Position, allowWalls: boolean = false
   return neighbors;
 }
 
+/** Reconstruct path from parent pointers */
+function reconstructPath(parent: Map<string, Position | null>, end: Position): Position[] {
+  const path: Position[] = [];
+  let current: Position | null = end;
+
+  while (current !== null) {
+    path.unshift(current);
+    const key: string = `${current.x},${current.y}`;
+    current = parent.get(key) ?? null;
+  }
+
+  return path;
+}
+
 function findPath(grid: Cell[][], start: Position, end: Position): Position[] | null {
-  const queue: { pos: Position; path: Position[] }[] = [{ pos: start, path: [start] }];
-  const visited = new Set<string>();
-  visited.add(`${start.x},${start.y}`);
+  const queue: Position[] = [start];
+  const parent = new Map<string, Position | null>();
+  parent.set(`${start.x},${start.y}`, null);
 
   while (queue.length > 0) {
     const current = queue.shift()!;
 
-    if (current.pos.x === end.x && current.pos.y === end.y) {
-      return current.path;
+    if (current.x === end.x && current.y === end.y) {
+      return reconstructPath(parent, end);
     }
 
-    for (const neighbor of getNeighbors(grid, current.pos)) {
+    for (const neighbor of getNeighbors(grid, current)) {
       const key = `${neighbor.x},${neighbor.y}`;
-      if (!visited.has(key)) {
-        visited.add(key);
-        queue.push({
-          pos: neighbor,
-          path: [...current.path, neighbor],
-        });
+      if (!parent.has(key)) {
+        parent.set(key, current);
+        queue.push(neighbor);
       }
     }
   }
@@ -81,33 +100,52 @@ function findPath(grid: Cell[][], start: Position, end: Position): Position[] | 
   return null;
 }
 
-// Find path that can break through walls
+/** Reconstruct path and collect walls from parent pointers */
+function reconstructPathWithWalls(
+  parent: Map<string, Position | null>,
+  grid: Cell[][],
+  end: Position
+): { path: Position[]; wallsToBreak: Position[] } {
+  const path: Position[] = [];
+  const wallsToBreak: Position[] = [];
+  let current: Position | null = end;
+
+  while (current !== null) {
+    path.unshift(current);
+    if (grid[current.y][current.x].isWall) {
+      wallsToBreak.unshift(current);
+    }
+    const key: string = `${current.x},${current.y}`;
+    current = parent.get(key) ?? null;
+  }
+
+  return { path, wallsToBreak };
+}
+
+// Find path that can break through walls (Dijkstra's algorithm with parent pointers)
 function findPathWithWallBreaking(
   grid: Cell[][],
   start: Position,
   end: Position
 ): { path: Position[]; wallsToBreak: Position[] } | null {
-  const queue: { pos: Position; path: Position[]; walls: Position[]; cost: number }[] = [
-    { pos: start, path: [start], walls: [], cost: 0 },
-  ];
-  const visited = new Map<string, number>();
-  visited.set(`${start.x},${start.y}`, 0);
+  const costs = new Map<string, number>();
+  const parent = new Map<string, Position | null>();
+  const queue: { pos: Position; cost: number }[] = [{ pos: start, cost: 0 }];
 
-  let bestResult: { path: Position[]; wallsToBreak: Position[] } | null = null;
-  let bestCost = Infinity;
+  costs.set(`${start.x},${start.y}`, 0);
+  parent.set(`${start.x},${start.y}`, null);
 
   while (queue.length > 0) {
     queue.sort((a, b) => a.cost - b.cost);
     const current = queue.shift()!;
+    const currentKey = `${current.pos.x},${current.pos.y}`;
 
-    if (current.cost >= bestCost) continue;
+    // Skip if we've found a better path to this node
+    if (current.cost > (costs.get(currentKey) ?? Infinity)) continue;
 
+    // Found the destination
     if (current.pos.x === end.x && current.pos.y === end.y) {
-      if (current.cost < bestCost) {
-        bestCost = current.cost;
-        bestResult = { path: current.path, wallsToBreak: current.walls };
-      }
-      continue;
+      return reconstructPathWithWalls(parent, grid, end);
     }
 
     for (const neighbor of getNeighbors(grid, current.pos, true)) {
@@ -116,20 +154,15 @@ function findPathWithWallBreaking(
       const newCost = current.cost + moveCost;
       const key = `${neighbor.x},${neighbor.y}`;
 
-      if (!visited.has(key) || visited.get(key)! > newCost) {
-        visited.set(key, newCost);
-        const newWalls = isWall ? [...current.walls, neighbor] : current.walls;
-        queue.push({
-          pos: neighbor,
-          path: [...current.path, neighbor],
-          walls: newWalls,
-          cost: newCost,
-        });
+      if (!costs.has(key) || costs.get(key)! > newCost) {
+        costs.set(key, newCost);
+        parent.set(key, current.pos);
+        queue.push({ pos: neighbor, cost: newCost });
       }
     }
   }
 
-  return bestResult;
+  return null;
 }
 
 // Get empty cells (non-wall, non-contribution) in a specific column range
@@ -190,7 +223,7 @@ export function generateHeroPath(grid: Cell[][]): GamePath {
   }
 
   // PRE-PLACE all monsters spread across the entire year
-  const monsterPositions: { pos: Position; type: string }[] = [];
+  const monsterPositions: { pos: Position; type: NonNullable<Cell['monsterType']> }[] = [];
   const occupiedPositions = new Set<string>();
   occupiedPositions.add(`${start.x},${start.y}`);
 
@@ -217,7 +250,7 @@ export function generateHeroPath(grid: Cell[][]): GamePath {
   monsterPositions.sort((a, b) => a.pos.x - b.pos.x);
 
   // Create a map of monster positions for quick lookup
-  const monsterMap = new Map<string, { pos: Position; type: string }>();
+  const monsterMap = new Map<string, { pos: Position; type: NonNullable<Cell['monsterType']> }>();
   for (const m of monsterPositions) {
     monsterMap.set(`${m.pos.x},${m.pos.y}`, m);
   }

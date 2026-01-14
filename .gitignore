@@ -5,6 +5,7 @@ node_modules/
 
 # Compiled JS output (SVGs are generated separately)
 dist/*.js
+dist/__tests__/
 
 # Asset files (sprites are embedded as base64 in code)
 *.zip

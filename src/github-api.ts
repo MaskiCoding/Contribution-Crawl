@@ -1,11 +1,22 @@
 import { graphql } from '@octokit/graphql';
-import { ContributionWeek, ContributionDay } from './types';
-import { WEEKS_IN_YEAR, DAYS_IN_WEEK } from './constants';
+import { ContributionWeek, ContributionDay } from './types.js';
+import { WEEKS_IN_YEAR, DAYS_IN_WEEK } from './constants.js';
+
+/** Response type for GitHub GraphQL contributions query */
+interface ContributionsResponse {
+  user: {
+    contributionsCollection: {
+      contributionCalendar: {
+        weeks: ContributionWeek[];
+      };
+    };
+  } | null;
+}
 
 export async function fetchContributions(username: string, token?: string): Promise<ContributionWeek[]> {
   const graphqlWithAuth = graphql.defaults({
     headers: {
-      authorization: token ? `token ${token}` : '',
+      authorization: token ? `Bearer ${token}` : '',
     },
   });
 
@@ -27,7 +38,12 @@ export async function fetchContributions(username: string, token?: string): Prom
     }
   `;
 
-  const response: any = await graphqlWithAuth(query, { username });
+  const response = await graphqlWithAuth<ContributionsResponse>(query, { username });
+
+  if (!response.user) {
+    throw new Error(`User "${username}" not found on GitHub`);
+  }
+
   return response.user.contributionsCollection.contributionCalendar.weeks;
 }
 
@@ -40,6 +56,12 @@ export function generateMockContributions(): ContributionWeek[] {
     'THIRD_QUARTILE',
     'FOURTH_QUARTILE',
   ];
+
+  // Start from a year ago
+  const startDate = new Date();
+  startDate.setFullYear(startDate.getFullYear() - 1);
+  // Align to Sunday (start of week)
+  startDate.setDate(startDate.getDate() - startDate.getDay());
 
   for (let week = 0; week < WEEKS_IN_YEAR; week++) {
     const days: ContributionDay[] = [];
@@ -57,8 +79,13 @@ export function generateMockContributions(): ContributionWeek[] {
         count = levelIdx * 3;
       }
 
+      // Generate valid ISO date
+      const currentDate = new Date(startDate);
+      currentDate.setDate(startDate.getDate() + week * 7 + day);
+      const dateStr = currentDate.toISOString().split('T')[0];
+
       days.push({
-        date: `2024-${String(week).padStart(2, '0')}-${day}`,
+        date: dateStr,
         contributionCount: count,
         contributionLevel: level,
       });
@@ -79,6 +106,12 @@ export function generateDenseContributions(): ContributionWeek[] {
     'THIRD_QUARTILE',
     'FOURTH_QUARTILE',
   ];
+
+  // Start from a year ago
+  const startDate = new Date();
+  startDate.setFullYear(startDate.getFullYear() - 1);
+  // Align to Sunday (start of week)
+  startDate.setDate(startDate.getDate() - startDate.getDay());
 
   for (let week = 0; week < WEEKS_IN_YEAR; week++) {
     const days: ContributionDay[] = [];
@@ -102,8 +135,13 @@ export function generateDenseContributions(): ContributionWeek[] {
         count = levelIdx * 3;
       }
 
+      // Generate valid ISO date
+      const currentDate = new Date(startDate);
+      currentDate.setDate(startDate.getDate() + week * 7 + day);
+      const dateStr = currentDate.toISOString().split('T')[0];
+
       days.push({
-        date: `2024-${String(week).padStart(2, '0')}-${day}`,
+        date: dateStr,
         contributionCount: count,
         contributionLevel: level,
       });

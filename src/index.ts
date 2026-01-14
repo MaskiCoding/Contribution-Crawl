@@ -1,9 +1,9 @@
 import * as fs from 'node:fs';
 import * as path from 'node:path';
-import { fetchContributions, generateMockContributions, generateDenseContributions } from './github-api';
-import { createDungeonGrid, generateHeroPath } from './game-engine';
-import { generateSVG } from './svg-renderer';
-import { LIGHT_THEME, DARK_THEME } from './types';
+import { fetchContributions, generateMockContributions, generateDenseContributions } from './github-api.js';
+import { createDungeonGrid, generateHeroPath } from './game-engine.js';
+import { generateSVG } from './svg-renderer.js';
+import { LIGHT_THEME, DARK_THEME } from './types.js';
 
 async function main() {
   const username = process.argv[2] || process.env.GITHUB_USERNAME || 'octocat';
