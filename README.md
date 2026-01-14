@@ -166,6 +166,15 @@ node dist/index.js TestUser dist --mock
 GITHUB_TOKEN=your_token node dist/index.js your-username dist
 ```
 
+### Development Commands
+
+| Command | Description |
+|---------|-------------|
+| `npm run build` | Compile TypeScript to JavaScript |
+| `npm test` | Run unit tests |
+| `npm run lint` | Check for linting errors |
+| `npm run format` | Format code with Prettier |
+
 ### CLI Options
 
 | Option | Description |
